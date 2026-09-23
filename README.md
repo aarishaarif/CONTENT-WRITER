@@ -1,119 +1,76 @@
-# AI Content Writer
+# ✍️ AI Content Writer
 
-A full-stack AI Content Writer web app powered by **Qwen2.5-0.5B-Instruct**. Generate blog posts, articles, essays, social media posts, product descriptions, and marketing copy with customizable tone, length, and creativity.
+A single-page AI Content Writer powered by **Qwen2.5-0.5B-Instruct**, built with **Streamlit**, and deployed on **Streamlit Community Cloud** (free).
 
 ## Tech Stack
 
-- **Backend:** Python, FastAPI, Transformers, PyTorch
-- **Frontend:** React, Vite, Tailwind CSS
-- **Model:** Qwen/Qwen2.5-0.5B-Instruct
-- **Deployment:** Render
+| Layer | Tech |
+|---|---|
+| UI + Logic | Python, Streamlit |
+| AI Model | Qwen/Qwen2.5-0.5B-Instruct |
+| Libraries | Transformers, PyTorch, Accelerate |
+| Hosting | Streamlit Community Cloud |
 
-## Prerequisites
+## Features
 
-- Python 3.11+
-- Node.js 18+
-- Git
+- 6 content types — Blog Post, Article, Essay, Social Media Post, Product Description, Marketing Copy
+- 6 tones — Professional, Friendly, Informative, Persuasive, Creative, Casual
+- 3 lengths — Short, Medium, Long
+- Temperature slider for creativity control
+- Download generated content as `.txt`
+- Responsive two-column layout
 
 ## Local Setup
 
-### Backend
-
 ```bash
-cd backend
+# 1. Clone
+git clone https://github.com/YOUR_USERNAME/ai-content-writer.git
+cd ai-content-writer
+
+# 2. Virtual environment
+python3 -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+
+# 3. Install
 pip install -r requirements.txt
-uvicorn main:app --host 0.0.0.0 --port 8000
+
+# 4. Run
+streamlit run app.py
 ```
 
-The backend will be available at `http://localhost:8000`. The model will download on first startup.
+Opens at `http://localhost:8501`. Model downloads on first run (~1 GB).
 
-### Frontend
+## Deploy on Streamlit Community Cloud (Free)
 
-```bash
-cd frontend
-npm install
-cp .env.example .env   # Update VITE_API_URL to point to your backend
-npm run dev
-```
+1. Push this repo to GitHub.
+2. Go to [share.streamlit.io](https://share.streamlit.io) → **New app**.
+3. Fill in:
 
-The frontend will be available at `http://localhost:3000`.
+| Field | Value |
+|---|---|
+| **Repository** | `your-username/ai-content-writer` |
+| **Branch** | `main` |
+| **Main file path** | `app.py` |
 
-## Deployment
+4. Click **Deploy** — done! 🎉
 
-### Render Backend (Web Service)
-
-1. Push your repo to GitHub.
-2. On Render, create a new **Web Service** from your repo.
-3. Set the following:
-   - **Build Command:** `cd backend && pip install -r requirements.txt`
-   - **Start Command:** `cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT`
-   - **Environment Variables:** Add `PYTHONUNBUFFERED=1`
-4. Render will auto-deploy on push.
-
-### Render Frontend (Static Site)
-
-1. On Render, create a new **Static Site** from your repo.
-2. Set the following:
-   - **Build Command:** `cd frontend && npm install && npm run build`
-   - **Publish Directory:** `frontend/dist`
-   - **Environment Variables:** Add `VITE_API_URL=https://your-backend-url.onrender.com`
-3. Render will auto-deploy on push.
-
-### One-Click Deploy with render.yaml
-
-Push the repo to GitHub and use the `render.yaml` file to deploy both services at once.
+> First deploy takes ~5 min (model download). After that it's fast.
 
 ## Project Structure
 
 ```
-/backend   -> FastAPI app, requirements.txt, Dockerfile
-/frontend  -> React app (Vite), package.json, .env.example
-render.yaml  -> Infrastructure as Code for Render
-README.md  -> Setup + deployment instructions
+app.py              → Streamlit app (UI + model)
+requirements.txt    → Python dependencies
+.github/workflows/  → CI/CD (lint on push, auto-deploy on main)
+backend/            → Old FastAPI backend (not used)
+frontend/           → Old React frontend (not used)
 ```
 
-## API Endpoints
+## CI/CD
 
-- `GET /health` — Check server status
-- `POST /generate` — Generate content
-  ```json
-  {
-    "topic": "machine learning",
-    "content_type": "blog post",
-    "tone": "Informative",
-    "length": "Medium",
-    "temperature": 0.7
-  }
-  ```
-  Returns `{ "content": "..." }`.
-
-## CI/CD (GitHub Actions)
-
-Two workflows live in `.github/workflows/`:
-
-| Workflow | File | Trigger |
+| Workflow | Trigger | Action |
 |---|---|---|
-| CI — lint & test | `ci.yml` | Every push and pull request |
-| CD — deploy | `cd.yml` | Push to `main` only |
+| `ci.yml` | Every push / PR | Lint `app.py` with Ruff |
+| `cd.yml` | Push to `main` | Streamlit Cloud auto-redeploys |
 
-### CI workflow
-- **Backend**: installs dependencies, runs `ruff` for linting, then `pytest` (20 tests, torch/transformers fully mocked — no model download needed).
-- **Frontend**: runs `npm ci` then `npm run build` to catch build-time errors.
-
-### CD workflow
-The CD job calls Render [deploy hooks](https://render.com/docs/deploy-hooks) to trigger a redeploy whenever you push to `main`.
-
-**Setup** — add two repository secrets in GitHub (Settings → Secrets and variables → Actions):
-
-| Secret name | Where to get it |
-|---|---|
-| `RENDER_BACKEND_DEPLOY_HOOK` | Render dashboard → backend service → Settings → Deploy Hooks |
-| `RENDER_FRONTEND_DEPLOY_HOOK` | Render dashboard → frontend static site → Settings → Deploy Hooks |
-
-Once the secrets are set, every push to `main` will automatically redeploy both services.
-
-## Notes
-
-- The 0.5B model is CPU-friendly and can run on Render's free/starter instances.
-- For faster generation, a GPU instance is recommended.
-- Model downloads may take a few minutes on first startup.
+Streamlit Cloud watches your `main` branch — every push auto-redeploys. No secrets or webhooks needed.

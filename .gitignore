@@ -8,19 +8,20 @@ venv/
 .env.*
 !.env.example
 
-# Node
-node_modules/
-dist/
-.cache/
-.parcel-cache/
+# Backend & Frontend (not used in Streamlit deploy)
+backend/venv/
+frontend/node_modules/
+frontend/dist/
 
-# Model cache
-.hf/
-.cache/torch/
+# Model cache (too large for git)
+.cache/
 *.model
 *.bin
 *.safetensors
 *.pt
+
+# Streamlit
+.streamlit/secrets.toml
 
 # OS
 .DS_Store
@@ -29,3 +30,6 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+
+# Jupyter
+*.ipynb_checkpoints/
