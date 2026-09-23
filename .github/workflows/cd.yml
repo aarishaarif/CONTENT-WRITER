@@ -1,0 +1,29 @@
+name: CD — Deploy to Render
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Trigger Render deploys
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy backend to Render
+        # Calls the Render deploy hook stored as a GitHub secret.
+        # In Render dashboard → your service → Settings → Deploy Hooks → copy the URL
+        # Then add it in GitHub: Settings → Secrets → Actions → RENDER_BACKEND_DEPLOY_HOOK
+        run: |
+          curl -fsS -X POST "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}" \
+            -o /dev/null \
+            -w "Backend deploy triggered (HTTP %{http_code})\n"
+
+      - name: Deploy frontend to Render
+        # Same process for the static site.
+        # Add the URL as RENDER_FRONTEND_DEPLOY_HOOK in GitHub Secrets.
+        run: |
+          curl -fsS -X POST "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}" \
+            -o /dev/null \
+            -w "Frontend deploy triggered (HTTP %{http_code})\n"
